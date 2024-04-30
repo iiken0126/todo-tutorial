@@ -42,7 +42,19 @@ export default function Home() {
     setTodoItems([...todoItems, newTodos]);
   };
 
+  const handleDeleteTodo = (id: string, complete: boolean) => {
+    // 押したものが未完了Todoだった場合
+    if (complete === false) {
+      // 未完了Todoを更新(未完了Todoを一覧にして、押したID以外のTODOを残す。)
+      setTodoItems(todoItems.filter((todo) => todo.id !== id));
+    } else {
+      // 完了Todoだった場合
+      setCompleteTodos(completeTodos.filter((todo) => todo.id !== id));
+    }
+  };
+
   const handleCompleteTodo = (id: string) => {
+    // 未完了TodoをMAPして、一致したidのTODOのコンプリートをtrueにする。
     const updateTodos = todoItems.map((todo) => {
       if (todo.id === id) {
         return { ...todo, complete: true };
@@ -54,7 +66,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="p-4">
+      <div className="p-4 max-w-[800px] mx-auto">
         <div className="mb-4 flex gap-2">
           <input
             type="text"
@@ -102,7 +114,7 @@ export default function Home() {
                   </button>
                   <button
                     className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 active:scale-95 transition duration-300"
-                    onClick={() => {}}
+                    onClick={() => handleDeleteTodo(todo.id, false)}
                   >
                     削除
                   </button>
@@ -136,7 +148,7 @@ export default function Home() {
                   </button>
                   <button
                     className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 active:scale-95 transition duration-300"
-                    onClick={() => {}}
+                    onClick={() => handleDeleteTodo(todo.id, true)}
                   >
                     削除
                   </button>

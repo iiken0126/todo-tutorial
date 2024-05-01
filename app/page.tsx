@@ -8,7 +8,7 @@ type TodoType = {
   complete: boolean;
 };
 
-export default function Home() {
+export default async function Home() {
   // これはデータベースを追加するまでの仮ID
   const newId = Date.now().toString();
   const [inputTitle, setInputTitle] = useState("");

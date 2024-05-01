@@ -14,18 +14,18 @@ export default function Home() {
   const [inputTitle, setInputTitle] = useState("");
   const [inputContent, setInputContent] = useState("");
   const [todoItems, setTodoItems] = useState<TodoType[]>([
-    { id: "0", title: "title1", content: "content1", complete: false },
-    { id: "1", title: "title2", content: "content2", complete: false },
+    { id: "non0", title: "title1", content: "content1", complete: false },
+    { id: "none1", title: "title2", content: "content2", complete: false },
   ]);
   const [completeTodos, setCompleteTodos] = useState<TodoType[]>([
     {
-      id: "0",
+      id: "complete0",
       title: "完了したtitle1",
       content: "完了したcontent1",
       complete: true,
     },
     {
-      id: "1",
+      id: "complete1",
       title: "完了したtitle2",
       content: "完了したcontent2",
       complete: true,
@@ -54,14 +54,23 @@ export default function Home() {
   };
 
   const handleCompleteTodo = (id: string) => {
-    // 未完了TodoをMAPして、一致したidのTODOのコンプリートをtrueにする。
-    const updateTodos = todoItems.map((todo) => {
-      if (todo.id === id) {
-        return { ...todo, complete: true };
-      }
-      return todo;
-    });
-    setTodoItems(updateTodos);
+    // クリックしたTodo
+    const targetTodo = todoItems.find((todo) => todo.id === id);
+    if (targetTodo) {
+      // 未完了のTodoから対象を消す
+      setTodoItems(todoItems.filter((todo) => todo.id !== id));
+      // 完了のTodoに対象のTodoを追加する
+      setCompleteTodos([...completeTodos, targetTodo]);
+    }
+  };
+
+  const handleRestoreTodo = (id: string) => {
+    const targetTodo = completeTodos.find((todo) => todo.id === id);
+
+    if (targetTodo) {
+      setCompleteTodos(completeTodos.filter((todo) => todo.id !== id));
+      setTodoItems([...todoItems, targetTodo]);
+    }
   };
 
   return (
@@ -142,7 +151,7 @@ export default function Home() {
                 <div className="flex gap-2">
                   <button
                     className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 active:scale-95 transition duration-300"
-                    onClick={() => {}}
+                    onClick={() => handleRestoreTodo(todo.id)}
                   >
                     戻す
                   </button>

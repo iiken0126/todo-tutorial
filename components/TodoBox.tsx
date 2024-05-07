@@ -1,14 +1,36 @@
-import { createClient } from "@/utils/supabase/server";
+"use client";
+import React, { useEffect, useState } from "react";
+import {
+  fetchTodos,
+  completeTodos,
+  deleteTodos,
+  restoreTodos,
+} from "@/app/todos/actions";
+import { Database, Tables } from "@/lib/database.types";
 
-export default async function TodoBox() {
-  const supabase = createClient();
+export default function TodoBox() {
+  const [todos, setTodos] = useState<Tables<"todos">[]>([]);
+  // const [completeTodos, setCompleteTodos] = useState<Tables<"todos">[]>([]);
 
-  const { data: todos, error } = await supabase.from("todos").select();
+  useEffect(() => {
+    async function loadTodos() {
+      const fetchedTodos = await fetchTodos();
+      setTodos(fetchedTodos || []);
+    }
+    loadTodos();
+  }, []);
 
-  if (error) {
-    return <div>Todoがまだ登録されていません</div>;
-  }
+  const handleDeleteTodo = (id: number) => {
+    deleteTodos(id);
+  };
 
+  const handleCompleteTodo = (id: number) => {
+    completeTodos(id);
+  };
+
+  const handleRestoreTodo = (id: number) => {
+    restoreTodos(id);
+  };
   return (
     <>
       <div className="bg-white rounded-lg p-4">
@@ -30,10 +52,16 @@ export default async function TodoBox() {
                   ID: {todo.id} / {todo.title}: {todo.content}
                 </span>
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 active:scale-95 transition duration-300">
+                  <button
+                    className="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 active:scale-95 transition duration-300"
+                    onClick={() => handleCompleteTodo(todo.id)}
+                  >
                     完了
                   </button>
-                  <button className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 active:scale-95 transition duration-300">
+                  <button
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 active:scale-95 transition duration-300"
+                    onClick={() => handleDeleteTodo(todo.id)}
+                  >
                     削除
                   </button>
                 </div>
@@ -60,10 +88,16 @@ export default async function TodoBox() {
                   ID: {todo.id} / {todo.title}: {todo.content}
                 </span>
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 active:scale-95 transition duration-300">
+                  <button
+                    className="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 active:scale-95 transition duration-300"
+                    onClick={() => handleRestoreTodo(todo.id)}
+                  >
                     戻す
                   </button>
-                  <button className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 active:scale-95 transition duration-300">
+                  <button
+                    className="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-600 active:scale-95 transition duration-300"
+                    onClick={() => handleDeleteTodo(todo.id)}
+                  >
                     削除
                   </button>
                 </div>

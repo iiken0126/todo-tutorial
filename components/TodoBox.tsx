@@ -6,18 +6,68 @@ import {
   deleteTodos,
   restoreTodos,
 } from "@/app/todos/actions";
-import { Database, Tables } from "@/lib/database.types";
+import { Tables } from "@/lib/database.types";
+import { createClient } from "@/utils/supabase/client";
 
 export default function TodoBox() {
   const [todos, setTodos] = useState<Tables<"todos">[]>([]);
-  // const [completeTodos, setCompleteTodos] = useState<Tables<"todos">[]>([]);
+  const [updateTodos, setUpdateTodos] = useState<Tables<"todos">[]>([]);
+  const supabase = createClient();
+
+  const fetchRealtimeTodos = () => {
+    try {
+      supabase
+        .channel("table_postgres_changes")
+        .on(
+          "postgres_changes",
+          {
+            event: "*",
+            schema: "public",
+            table: "todos",
+          },
+          (payload) => {
+            if (payload.eventType === "INSERT") {
+              const { id, title, content, complete } = payload.new;
+              setTodos((todos) => [...todos, { id, title, content, complete }]);
+            }
+
+            if (payload.eventType === "DELETE") {
+              setTodos((todos) =>
+                todos.filter((todo) => todo.id !== payload.old.id)
+              );
+            }
+
+            if (payload.eventType === "UPDATE") {
+              const { id, title, content, complete } = payload.new;
+
+              setTodos((todos) =>
+                todos.map((todo) => {
+                  if (todo.id === payload.old.id) {
+                    return { ...todo, title, content, complete };
+                  }
+                  return todo;
+                })
+              );
+            }
+          }
+        )
+        .subscribe();
+
+      return () => {
+        supabase.channel("table_postgres_changes").unsubscribe();
+      };
+    } catch (error) {
+      console.error(error);
+    }
+  };
 
   useEffect(() => {
     async function loadTodos() {
       const fetchedTodos = await fetchTodos();
       setTodos(fetchedTodos || []);
     }
-    loadTodos();
+    // loadTodos();
+    fetchRealtimeTodos();
   }, []);
 
   const handleDeleteTodo = (id: number) => {

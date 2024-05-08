@@ -41,6 +41,7 @@ export async function completeTodos (id: number) {
 
 export async function restoreTodos (id: number ) {
   const supabase = createClient();
-
+  
   const { error } = await supabase.from("todos").update({complete: false}).eq("id", id);
 }
+
